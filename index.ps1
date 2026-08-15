@@ -2,9 +2,12 @@
 # JMHelpDesk - Menú Interactivo de Tweaks y Configuración de Sistema
 # ==============================================================================
 
-# Elevación a permisos de Administrador
+# URL de origen para re-elevación
+$scriptUrl = "https://javiermaldonado11.github.io/JMHelpDesk/index.ps1"
+
+# Elevación a permisos de Administrador compatible con ejecuciones web (irm | iex)
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -NoProfile -Command `"$PSCommandPath`"" -Verb RunAs
+    Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"irm $scriptUrl | iex`"" -Verb RunAs
     exit
 }
 
@@ -66,8 +69,6 @@ $btnRun.ForeColor = [System.Drawing.Color]::White
 $btnRun.FlatStyle = [System.Drawing.FlatStyle]::Flat
 
 $btnRun.Add_Click({
-    $form.Cursor = [System.Windows.Forms.Cursors]::WaitCursor
-    
     # 1. Modo Oscuro
     if ($checkBoxes["DarkMode"].Checked) {
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "AppsUseLightTheme" -Type DWord -Value 0 -ErrorAction SilentlyContinue
@@ -115,5 +116,5 @@ $btnRun.Add_Click({
 
 $form.Controls.Add($btnRun)
 
-# Mostrar la interfaz
-[System.Windows.Forms.Application]::Run($form)
+# Mostrar ventana
+$form.ShowDialog() | Out-Null
