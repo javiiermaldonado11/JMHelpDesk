@@ -5,10 +5,10 @@
 # Forzar protocolo TLS 1.2
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# URL RAW directa (Evita caché de GitHub Pages)
-$rawUrl = "https://raw.githubusercontent.com/javiermaldonado11/JMHelpDesk/main/index.ps1"
+# URL RAW directa
+$rawUrl = "https://raw.githubusercontent.com/javiiermaldonado11/JMHelpDesk/main/index.ps1"
 
-# Elevación a Administrador con modo gráfico habilitado (-STA) y sin cierre automático (-NoExit)
+# Elevación a Administrador
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -STA -NoExit -Command `"irm $rawUrl | iex`"" -Verb RunAs
     exit
@@ -65,12 +65,13 @@ foreach ($item in $items) {
 # Botón Ejecutar
 $btnRun = New-Object System.Windows.Forms.Button
 $btnRun.Text = "Aplicar Seleccionados"
-$btnRun.Location = New-Object System.Drawing.Point(25, $y + 15)
+$btnY = $y + 15
+$btnRun.Location = New-Object System.Drawing.Point(25, $btnY)
 $btnRun.Size = New-Object System.Drawing.Size(360, 40)
 $btnRun.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
 $btnRun.BackColor = [System.Drawing.Color]::FromArgb(0, 120, 215)
 $btnRun.ForeColor = [System.Drawing.Color]::White
-$btnRun.FlatStyle = [System.Drawing.FlatStyle]::Flat
+$btnRun.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
 
 $btnRun.Add_Click({
     if ($checkBoxes["DarkMode"].Checked) {
