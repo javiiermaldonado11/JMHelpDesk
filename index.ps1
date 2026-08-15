@@ -2,7 +2,7 @@
 # JMHelpDesk - Menú Interactivo de Tweaks
 # ==============================================================================
 
-# Forzar protocolo TLS 1.2
+# Forzar TLS 1.2
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # URL RAW directa
@@ -10,11 +10,11 @@ $rawUrl = "https://raw.githubusercontent.com/javiiermaldonado11/JMHelpDesk/main/
 
 # Elevación a Administrador
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -STA -NoExit -Command `"irm $rawUrl | iex`"" -Verb RunAs
+    Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -STA -NoExit -Command `"irm '$rawUrl?v=$(Get-Random)' | iex`"" -Verb RunAs
     exit
 }
 
-# Cargar librerías visuales de Windows
+# Cargar librerías GUI de Windows
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
@@ -36,7 +36,7 @@ $label.Size = New-Object System.Drawing.Size(370, 25)
 $label.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
 $form.Controls.Add($label)
 
-# Lista de opciones
+# Opciones
 $items = @(
     @{ ID="DarkMode"; Text="Activar Modo Oscuro (Apps y Sistema)" },
     @{ ID="ShowHidden"; Text="Mostrar Extensiones y Archivos Ocultos" },
@@ -65,8 +65,8 @@ foreach ($item in $items) {
 # Botón Ejecutar
 $btnRun = New-Object System.Windows.Forms.Button
 $btnRun.Text = "Aplicar Seleccionados"
-$btnY = $y + 15
-$btnRun.Location = New-Object System.Drawing.Point(25, $btnY)
+$btnPosY = [int]($y + 15)
+$btnRun.Location = New-Object System.Drawing.Point(25, $btnPosY)
 $btnRun.Size = New-Object System.Drawing.Size(360, 40)
 $btnRun.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
 $btnRun.BackColor = [System.Drawing.Color]::FromArgb(0, 120, 215)
