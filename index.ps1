@@ -18,7 +18,7 @@ Add-Type -AssemblyName System.Drawing
 # Ventana Principal
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "JMHelpDesk - Suite de Mantenimiento"
-$form.Size = New-Object System.Drawing.Size(480, 720)
+$form.Size = New-Object System.Drawing.Size(480, 800)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "FixedSingle"
 $form.MaximizeBox = $false
@@ -52,7 +52,7 @@ $form.Controls.Add($header)
 # Contenedor Principal de Opciones
 $container = New-Object System.Windows.Forms.Panel
 $container.Location = New-Object System.Drawing.Point(15, 65)
-$container.Size = New-Object System.Drawing.Size(435, 360)
+$container.Size = New-Object System.Drawing.Size(435, 455)
 $container.BackColor = [System.Drawing.Color]::White
 $container.BorderStyle = "FixedSingle"
 
@@ -91,6 +91,10 @@ $items = @(
     @{ ID="CleanDeliveryOpt"; Text="Limpiar Caché de Optimización de Distribución" },
     @{ ID="CleanSoftwareDist"; Text="Limpiar Caché de Descargas de Windows Update" },
     @{ ID="CleanLogsWER"; Text="Limpiar Informes de Error (WER) y Caché DirectX" },
+    @{ ID="CleanDumps"; Text="Limpiar Volcados de Memoria (Crash Dumps)" },
+    @{ ID="CleanLogsCBS"; Text="Limpiar Registros del Sistema (CBS y Panther)" },
+    @{ ID="CleanPrefetch"; Text="Limpiar Caché de Prefetch" },
+    @{ ID="CleanBrowserCache"; Text="Limpiar Caché de Navegadores (Edge/Chrome)" },
     @{ ID="EmptyBin"; Text="Vaciar Papelera de Reciclaje" },
     @{ ID="CleanWinUpdate"; Text="Limpiar Componentes de Windows (DISM)" }
 )
@@ -119,7 +123,7 @@ $form.Controls.Add($container)
 # Botón Ejecutar
 $btnRun = New-Object System.Windows.Forms.Button
 $btnRun.Text = "APLICAR OPTIMIZACIONES"
-$btnRun.Location = New-Object System.Drawing.Point(15, 433)
+$btnRun.Location = New-Object System.Drawing.Point(15, 528)
 $btnRun.Size = New-Object System.Drawing.Size(435, 40)
 $btnRun.Font = New-Object System.Drawing.Font("Segoe UI", 9.5, [System.Drawing.FontStyle]::Bold)
 $btnRun.BackColor = [System.Drawing.Color]::FromArgb(0, 102, 204)
@@ -133,8 +137,8 @@ $txtLog = New-Object System.Windows.Forms.TextBox
 $txtLog.Multiline = $true
 $txtLog.ReadOnly = $true
 $txtLog.ScrollBars = "Vertical"
-$txtLog.Location = New-Object System.Drawing.Point(15, 480)
-$txtLog.Size = New-Object System.Drawing.Size(435, 185)
+$txtLog.Location = New-Object System.Drawing.Point(15, 575)
+$txtLog.Size = New-Object System.Drawing.Size(435, 170)
 $txtLog.Font = New-Object System.Drawing.Font("Consolas", 8.5)
 $txtLog.BackColor = [System.Drawing.Color]::FromArgb(15, 17, 20)
 $txtLog.ForeColor = [System.Drawing.Color]::FromArgb(0, 230, 118)
@@ -234,6 +238,37 @@ $btnRun.Add_Click({
         Log-Msg "Eliminando informes de errores (WER) y caché DirectX..."
         Get-ChildItem -Path "$env:ProgramData\Microsoft\Windows\WER\*" -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
         Get-ChildItem -Path "$env:LOCALAPPDATA\D3DSCache\*" -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+    }
+
+    if ($checkBoxes["CleanDumps"].Checked) {
+        Log-Msg "Eliminando volcados de memoria (Crash Dumps)..."
+        Remove-Item -Path "$env:SystemRoot\Memory.dmp" -Force -ErrorAction SilentlyContinue
+        Get-ChildItem -Path "$env:SystemRoot\Minidump\*" -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+    }
+
+    if ($checkBoxes["CleanLogsCBS"].Checked) {
+        Log-Msg "Limpiando registros de CBS y Panther..."
+        Get-ChildItem -Path "$env:SystemRoot\Logs\CBS\*.cab" -Force -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+        Get-ChildItem -Path "$env:SystemRoot\Logs\CBS\*.log" -Force -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+        Get-ChildItem -Path "$env:SystemRoot\Panther\*" -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+    }
+
+    if ($checkBoxes["CleanPrefetch"].Checked) {
+        Log-Msg "Limpiando caché de Prefetch..."
+        Get-ChildItem -Path "$env:SystemRoot\Prefetch\*" -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+    }
+
+    if ($checkBoxes["CleanBrowserCache"].Checked) {
+        Log-Msg "Limpiando caché de navegadores (Edge/Chrome)..."
+        $browserCaches = @(
+            "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\Cache\Cache_Data",
+            "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache\Cache_Data"
+        )
+        foreach ($cache in $browserCaches) {
+            if (Test-Path $cache) {
+                Get-ChildItem -Path "$cache\*" -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+            }
+        }
     }
 
     if ($checkBoxes["EmptyBin"].Checked) {
