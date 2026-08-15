@@ -203,11 +203,24 @@ $btnRun.Add_Click({
     }
 
     if ($checkBoxes["CleanDeliveryOpt"].Checked) {
-        Log-Msg "Eliminando caché de Optimización de Distribución..."
-        $doPath = "$env:SystemRoot\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Cache"
-        if (Test-Path $doPath) {
-            Get-ChildItem -Path "$doPath\*" -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+        Log-Msg "Deteniendo servicio de Optimización de Distribución (DoSvc)..."
+        Stop-Service -Name "DoSvc" -Force -ErrorAction SilentlyContinue
+        
+        Log-Msg "Vaciando caché de Optimización de Distribución..."
+        if (Get-Command Delete-DeliveryOptimizationCache -ErrorAction SilentlyContinue) {
+            Delete-DeliveryOptimizationCache -Force -ErrorAction SilentlyContinue
         }
+
+        $doPaths = @(
+            "$env:SystemRoot\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Cache",
+            "$env:ProgramData\Microsoft\Windows\DeliveryOptimization\Cache"
+        )
+        foreach ($path in $doPaths) {
+            if (Test-Path $path) {
+                Get-ChildItem -Path "$path\*" -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+            }
+        }
+        Start-Service -Name "DoSvc" -ErrorAction SilentlyContinue
     }
 
     if ($checkBoxes["CleanSoftwareDist"].Checked) {
